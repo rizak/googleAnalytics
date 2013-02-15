@@ -51,6 +51,11 @@
     <name>Jahia Google Analytics</name>
     <packaging>bundle</packaging>
     <description>These are the custom module (Jahia Google Analytics) for running on a Jahia server.</description>
+    <scm>
+        <connection>scm:git:git@github.com:Jahia/googleAnalytics.git</connection>
+        <url>scm:git:git@github.com:Jahia/googleAnalytics.git</url>
+        <developerConnection>scm:git:git@github.com:Jahia/googleAnalytics.git</developerConnection>
+    </scm>
     <repositories>
         <repository>
             <id>jahia-public</id>
