@@ -91,7 +91,6 @@ public class GoogleAnalyticsFilter extends AbstractFilter implements Application
             String script = getResolvedTemplate();
             if (script != null) {
                 Source source = new Source(previousOut);
-                source.setLogger(null);
                 OutputDocument outputDocument = new OutputDocument(source);
                 List<Element> headElementList = source.getAllElements(HTMLElementName.HEAD);
                 for (Element element : headElementList) {
