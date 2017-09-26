@@ -45,11 +45,13 @@ package org.jahia.modules.googleAnalytics;
 
 import net.htmlparser.jericho.*;
 import org.apache.commons.lang.StringUtils;
+import org.jahia.data.templates.JahiaTemplatesPackage;
 import org.jahia.services.render.RenderContext;
 import org.jahia.services.render.Resource;
 import org.jahia.services.render.filter.AbstractFilter;
 import org.jahia.services.render.filter.RenderChain;
 import org.jahia.services.render.filter.cache.AggregateCacheFilter;
+import org.jahia.services.templates.JahiaModuleAware;
 import org.jahia.services.templates.JahiaTemplateManagerService.TemplatePackageRedeployedEvent;
 import org.jahia.utils.ScriptEngineUtils;
 import org.jahia.utils.WebUtils;
@@ -58,6 +60,7 @@ import org.slf4j.Logger;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
+import javax.jcr.RepositoryException;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -73,16 +76,34 @@ import java.util.List;
  * Date: 2/25/11
  * Time: 11:28 AM
  */
-public class GoogleAnalyticsFilter extends AbstractFilter implements ApplicationListener<ApplicationEvent> {
+public class GoogleAnalyticsFilter extends AbstractFilter implements ApplicationListener<ApplicationEvent>, JahiaModuleAware {
 
     private static Logger logger = LoggerFactory.getLogger(GoogleAnalyticsFilter.class);
 
     private ScriptEngineUtils scriptEngineUtils;
     
     private String template;
+
+    private JahiaTemplatesPackage module;
     
     private String resolvedTemplate;
-    
+
+    public GoogleAnalyticsFilter() {
+        //Execute filter only if module is enabled on the site
+        addCondition(new ExecutionCondition() {
+            @Override
+            public boolean matches(RenderContext renderContext, Resource resource) {
+                try {
+                    List<String> installedBundles = resource.getNode().getResolveSite().getInstalledModules();
+                    return installedBundles.contains(module.getBundle().getSymbolicName());
+                } catch (RepositoryException e) {
+                    logger.error("Error when execute filter condition", e);
+                }
+                return false;
+            }
+        });
+    }
+
     @Override
     public String execute(String previousOut, RenderContext renderContext, Resource resource, RenderChain chain) throws Exception {
         String out = previousOut;
@@ -148,7 +169,12 @@ public class GoogleAnalyticsFilter extends AbstractFilter implements Application
     public void setTemplate(String template) {
         this.template = template;
     }
-    
+
+    @Override
+    public void setJahiaModule(JahiaTemplatesPackage jahiaTemplatesPackage) {
+        this.module = jahiaTemplatesPackage;
+    }
+
     class GoogleScriptContext extends SimpleScriptContext {
         private Writer writer = null;
 
